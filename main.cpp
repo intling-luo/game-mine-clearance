@@ -1,1316 +1,219 @@
 #include<stdio.h>
-#include<easyx.h>
+#include<stdlib.h>
+#include<time.h> 
 #include<graphics.h>
-#include<windows.h>
-#include <stdlib.h>
-#include<mmsystem.h>//²¥·ÅÒôÀÖÎÄ¼ş¿â
-#include<time.h>//¼ÆÊ±Æ÷ĞèÒªµÄÍ·ÎÄ¼ş
-#pragma comment(lib,"Winmm.lib")
-bool Timer(clock_t ms, int id);
-int music_kg = 1;
-IMAGE diban[2];
-IMAGE BJ1;
-IMAGE menu_image_bj;
-IMAGE menu_image[2];
-IMAGE start_image[2];
-IMAGE help_image[2];
-IMAGE out_image[2];
-IMAGE YX_image[2];
-IMAGE YXK_image[2];
-IMAGE YXG_image[2];
-IMAGE caid;
-IMAGE caid2;
-IMAGE gb_menu[2];
-IMAGE back_menu[2];
-IMAGE yes_menu[2];
-IMAGE no_menu[2];
-IMAGE BULL_image[2];
-IMAGE zzbj1;
-IMAGE zzbj2;
-//×ó
-IMAGE jump1_image[3];
-IMAGE move1_image[7];
-IMAGE jump2_image[3];
-IMAGE move2_image[7];
-IMAGE stand1_image[4];
-IMAGE stand2_image[4];
-//ÓÒ
-IMAGE jump1_image2[3];
-IMAGE move1_image2[7];
-IMAGE jump2_image2[3];
-IMAGE move2_image2[7];
-IMAGE stand1_image2[4];
-IMAGE stand2_image2[4];
-//¹¥»÷
-IMAGE attack1_image[4];
-IMAGE attack2_image[4];
-IMAGE attack1_image2[4];
-IMAGE attack2_image2[4];
-//×Óµ¯
-IMAGE bull[3];
-IMAGE bull2[3];//×ó
-IMAGE bull3[3];//ÓÒ±ß
-IMAGE bull4[3];
-//µĞÈË
-IMAGE dr_death1;//1×ó2ÓÒ
-IMAGE dr_death2;
-IMAGE dr2_death1;//1×ó2ÓÒ
-IMAGE dr2_death2;
-//×óstand
-IMAGE dr_stand1[4];//ÆÕÍ¨
-IMAGE dr_stand2[4];
-IMAGE dr_2stand1[4];//ÊÜ»÷
-IMAGE dr_2stand2[4];
-//ÓÒstand
-IMAGE dr2_stand1[4];//ÆÕÍ¨
-IMAGE dr2_stand2[4];
-IMAGE dr2_2stand1[4];//ÊÜ»÷
-IMAGE dr2_2stand2[4];
-//½çÃæ
-IMAGE gg_image;
-IMAGE ts1_image;
-IMAGE win_image;
-IMAGE yes2_image[2];
-enum mymenu
-{
-	start,
-	gg,
-	ts1,
-	win,
-	opxx,
-	achieve,
-	ewnr,
-	out,
-	home
-};
-enum mymenu mystate = home;
-enum my
-{
-	bull_num = 5,
-	dr1_num = 8
-};
-struct sbwz
-{
-	int x=531;
-	int y[5]={398,438,480,530,570};
-	int n=0;
-}ZZSB;
-struct zj_init//Ğ¡ÆïÊ¿
-{
-	int x;
-	int y;
-	int init_y;
-	int x_self;//¼ÇÂ¼±¾Éí×ø±êÎ»ÖÃ(·ÇÍ¼Æ¬)
-	int y_self;
-	//¸øÓè±¾ÉíÊıÖµ
-	int high = 95;
-	int wight = 55;
-	IMAGE* ztai1;//ÑÚÂëÍ¼
-	IMAGE* ztai2;//Õı³£Í¼
-	int donzuo;
-	int live;
-	int js;//»÷É±¼ÆÊı
-	int mianxiang = 0;//0×ó£¬1ÓÒ
-	int move_pd = 0;//0Ô­µØ£¬1ÓÒ£¬-1×ó
-	int move_cd = 0;//ÅĞ¶¨ÒÆ¶¯¾àÀë
-	int jump_pd = 0;//0Ô­µØ£¬1ÏÂ£¬-1ÉÏ
-	int jump_pd2 = 0;//0Îª³õÊ¼£¬·ÇÁãÎª½øĞĞÁË2¶ÎÌøÔ¾
-	int gj_pd = 0;//0,²»Îª0Ê±ÎŞ·¨ÒÆ¶¯ÌøÔ¾
-	int gj_pd2 = 0;//0,´óÓÚ0Ê±¿ÕÖĞÎŞ·¨Éä»÷
-}xqs;
-struct dr_init//µĞÈË
-{
-	int x;
-	int y;
-	int init_y;
-	IMAGE* ztai1;
-	IMAGE* ztai2;
-	int donzuo;
-	int live;
-	int mianxiang = 0;
-	bool app = false;//trueÊ±»æÖÆÍ¼Æ¬£¬·ñÔò²»¾ÍĞĞ»æÖÆ
-	int shouji=0;//ÅĞ¶ÏÊÇ·ñÊÜ»÷,0Õı³£,·ñÔòËãÊÜ»÷
-	int xz ;//Î»ÒÆĞŞÕıÖµy
-	//¸øÓè±¾ÉíÊıÖµ
-	int x_self;
-	int y_self;
-	int high = 90;
-	int wight = 80;
-}dr_fly[dr1_num];
-void init_image()//Í¼Æ¬¼ÓÔØ
-{
-	for (int i = 0; i < 2; i++)
-	{
-		char lujin1[50] = { 0 };
-		sprintf(lujin1, "./res/diban%d.png", i);
-		loadimage(diban + i, lujin1,250,250);
-		sprintf(lujin1, "./res/menu%d.png", i);
-		loadimage(menu_image + i, lujin1, 70, 70);
-		sprintf(lujin1, "./res/playgame%d.png", i);
-		loadimage(start_image + i, lujin1, 180, 80);
-		sprintf(lujin1, "./res/help%d.png", i);
-		loadimage(help_image + i, lujin1, 180, 80);
-		sprintf(lujin1, "./res/exit%d.png", i);
-		loadimage(out_image + i, lujin1, 180, 80);
-		sprintf(lujin1, "./test/xuanze%d.png", i);
-		loadimage(gb_menu + i, lujin1, 222, 57);
-		sprintf(lujin1, "./test/yinxiao%d.png", i);
-		loadimage(YX_image + i, lujin1, 90, 40);
-		sprintf(lujin1, "./test/kai%d.png", i);
-		loadimage(YXK_image + i, lujin1, 50, 40);
-		sprintf(lujin1, "./test/guan%d.png", i);
-		loadimage(YXG_image + i, lujin1, 50, 40);
-		sprintf(lujin1, "./test/huidaocaidan%d.png", i);
-		loadimage(back_menu + i, lujin1, 180, 40);
-		sprintf(lujin1, "./test/bull%d.png", i);
-		loadimage(BULL_image + i, lujin1, 65, 20);
-		sprintf(lujin1, "./test/shi%d.png", i);
-		loadimage(yes_menu + i, lujin1, 45, 40);
-		sprintf(lujin1, "./jm/yes%d.png", i);
-		loadimage(yes2_image + i, lujin1, 225, 95);
-		sprintf(lujin1, "./test/fou%d.png", i);
-		loadimage(no_menu + i, lujin1, 45, 40);
-	}
-	loadimage(&menu_image_bj, "./res/menuunit3.png", 1280, 720);
-	loadimage(&BJ1, "./res/BJ1.png", 1280, 720);
-	loadimage(&caid, "./test/caidan1.png", 1280, 720);
-	loadimage(&caid2, "./test/beijing.png", 1280, 720);
-	loadimage(&zzbj1, "./test/zhandoubeijing.png", 1280, 720);
-	loadimage(&zzbj2, "./test/114514.png", 300, 50);
-	loadimage(&ts1_image, "./jm/ts1.png", 1280, 750);
-	loadimage(&gg_image, "./jm/gg.png", 1280, 750);
-	loadimage(&win_image, "./jm/win.png", 1280, 750);
-	//Ğ¡ÆïÊ¿¶¯×÷Í¼Æ¬
-	for (int i = 0; i < 3; i++)
-	{
-		char lujin1[50] = { 0 };
-		sprintf(lujin1, "./jump/jump_%d_0.png", i+1);
-		loadimage(jump1_image + i, lujin1, 90, 125);
-		sprintf(lujin1, "./jump/jump_%d_1.png", i+1);
-		loadimage(jump2_image + i, lujin1, 90, 125);
-		sprintf(lujin1, "./jump2/jump_%d_0.png", i + 1);
-		loadimage(jump1_image2 + i, lujin1, 90, 125);
-		sprintf(lujin1, "./jump2/jump_%d_1.png", i + 1);
-		loadimage(jump2_image2 + i, lujin1, 90, 125);
-	}
-	for (int i = 0; i < 4; i++)
-	{
-		char lujin1[50] = { 0 };
-		sprintf(lujin1, "./zl44/zl%d.png", i + 1);
-		loadimage(stand2_image + i, lujin1, 90, 125);
-		sprintf(lujin1, "./zl44/zl%d%d.png", i + 1,i+1);
-		loadimage(stand1_image + i, lujin1, 90, 125);
-		sprintf(lujin1, "./zl22/zl%d.png", i + 1);
-		loadimage(stand2_image2 + i, lujin1, 90, 125);
-		sprintf(lujin1, "./zl22/zl%d%d.png", i + 1, i + 1);
-		loadimage(stand1_image2 + i, lujin1, 90, 125);
-		//¹¥»÷¶¯»­ÌØÊâ´¦Àí
-		sprintf(lujin1, "./attack/%d 0 1.png", i + 1);
-		loadimage(attack1_image + i, lujin1, 90, 125);
-		sprintf(lujin1, "./attack/%d 0 2.png", i + 1);
-		loadimage(attack1_image2 + i, lujin1, 90, 125);
-		sprintf(lujin1, "./attack/%d 1 1.png", i + 1);
-		loadimage(attack2_image + i, lujin1, 90, 125);
-		sprintf(lujin1, "./attack/%d 1 2.png", i + 1);
-		loadimage(attack2_image2 + i, lujin1, 90, 125);
-	}
-	for (int i = 0; i < 7; i++)
-	{
-		char lujin1[50] = { 0 };
-		sprintf(lujin1, "./move/move_%d_0.png", i + 1);
-		loadimage(move1_image + i, lujin1, 90, 125);
-		sprintf(lujin1, "./move/move_%d_1.png", i + 1);
-		loadimage(move2_image + i, lujin1, 90, 125);
-		sprintf(lujin1, "./move2/move_%d_0.png", i + 1);
-		loadimage(move1_image2 + i, lujin1, 90, 125);
-		sprintf(lujin1, "./move2/move_%d_1.png", i + 1);
-		loadimage(move2_image2 + i, lujin1, 90, 125);
-	}
-	//×Óµ¯
-	for (int i = 0; i < 3; i++)
-	{
-		char lujin1[50] = { 0 };
-		sprintf(lujin1, "./bull/%d0.png", i + 1);
-		loadimage(bull + i, lujin1, 175, 30);
-		sprintf(lujin1, "./bull/%d1.png", i + 1);
-		loadimage(bull2 + i, lujin1, 175, 30);
-		sprintf(lujin1, "./bull2/%d0.png", i + 1);
-		loadimage(bull3 + i, lujin1, 175, 30);
-		sprintf(lujin1, "./bull2/%d1.png", i + 1);
-		loadimage(bull4 + i, lujin1, 175, 30);
-	}
-	//µĞÈË£¨·ÉĞĞ1)
-	char lujin1[50] = { 0 };
-	sprintf(lujin1, "./dr_death/1 0 1.png");
-	loadimage(&dr_death1, lujin1, 120, 120);
-	sprintf(lujin1, "./dr_death/1 1 1.png");
-	loadimage(&dr_death2, lujin1, 120, 120);
-	sprintf(lujin1, "./dr_death/1 0 2.png");
-	loadimage(&dr2_death1, lujin1, 120, 120);
-	sprintf(lujin1, "./dr_death/1 1 2.png");
-	loadimage(&dr2_death2, lujin1, 120, 120);
-	for (int i = 0; i < 4; i++)
-	{
-		char lujin1[50] = { 0 };
-		sprintf(lujin1, "./dr_stand/%d 0 1.png", i + 1);
-		loadimage(dr_stand1 + i, lujin1, 120, 120);
-		sprintf(lujin1, "./dr_stand/%d 1 1.png", i + 1);
-		loadimage(dr_stand2 + i, lujin1, 120, 120);
-		sprintf(lujin1, "./dr_stand/%d 0 1.png", i + 1);
-		loadimage(dr_2stand1 + i, lujin1, 120, 120);
-		sprintf(lujin1, "./dr_stand/%d 1 1 1.png", i + 1);
-		loadimage(dr_2stand2 + i, lujin1, 120, 120);
-		sprintf(lujin1, "./dr_stand/%d 0 2.png", i + 1);
-		loadimage(dr2_stand1 + i, lujin1, 120, 120);
-		sprintf(lujin1, "./dr_stand/%d 1 2.png", i + 1);
-		loadimage(dr2_stand2 + i, lujin1, 120, 120);
-		sprintf(lujin1, "./dr_stand/%d 0 2.png", i + 1);
-		loadimage(dr2_2stand1 + i, lujin1, 120, 120);
-		sprintf(lujin1, "./dr_stand/%d 1 2 1.png", i + 1);
-		loadimage(dr2_2stand2 + i, lujin1, 120, 120);
-	}
-}
-struct bull_sx
-{
-	int x;
-	int y;
-	bool live = false;
-	int mianxiang = 0;//0×ó£¬1ÓÒ
-	int donzuo = 0;//×Óµ¯¶¯×÷Êı×Ö
-	int init_x = 0;//·¢ÉäÎ»ÖÃ
-	int time = 0;//ËÀÍöÊ±¼ä
-	int high = 30;
-	int wight = 170;
-}bull_xqs[bull_num];
-void createbull()
-{
-	for (int i = 0; i < bull_num; i++)
-	{
-		if (!bull_xqs[i].live)
-		{
-			bull_xqs[i].mianxiang = xqs.mianxiang;
-			if (bull_xqs[i].mianxiang == 0)
-			{
-				bull_xqs[i].x = xqs.x - 155;
-				bull_xqs[i].y = xqs.y + 30;
-			}
-			else
-			{
-				bull_xqs[i].x = xqs.x + 60;
-				bull_xqs[i].y = xqs.y + 30;
-			}
-			bull_xqs[i].init_x = bull_xqs[i].x;
-			bull_xqs[i].live = true;
-			bull_xqs[i].time = 0;
-			break;
-		}
-	}
-}
-void bullmove()//×Óµ¯ÒÆ¶¯
-{
-	for (int i = 0; i < bull_num; i++)
-	{
-		if (bull_xqs[i].live&& bull_xqs[i].time==0)
-		{
-			//Ã»ËÀÔòÒÆ¶¯
-			if (bull_xqs[i].mianxiang == 0)
-			{
-				bull_xqs[i].x -= 30;
-				if (bull_xqs[i].x < bull_xqs[i].init_x - 190 && bull_xqs[i].donzuo == 0)
-				{
-					bull_xqs[i].donzuo = 1;
-				}
-			}
-			else
-			{
-				bull_xqs[i].x += 30;
-				if (bull_xqs[i].x > bull_xqs[i].init_x + 190 && bull_xqs[i].donzuo == 0)
-				{
-					bull_xqs[i].donzuo = 1;
-				}
-			}
-			if (bull_xqs[i].x < 0 - 175 || bull_xqs[i].x>getwidth() + 175)
-			{
-				bull_xqs[i].live = false;//³ö½çËÀÍö
-			}
-		}
-	}
-}
-int fhesc;
-void init_all()//´ó²¿·Ö³õÊ¼»¯
-{
-	//mystate = start;
-	ZZSB.n = 0;
-	fhesc = 0;
-}
-void init_dr_fly()//µĞÈË1³õÊ¼»¯
-{
-	for (int i = 0; i < dr1_num; i++)
-	{
-		dr_fly[i].x = -120;
-		dr_fly[i].y = -120;
-		dr_fly[i].ztai1 = dr_stand1;
-		dr_fly[i].ztai2 = dr_stand2;
-		dr_fly[i].donzuo = 0;
-		dr_fly[i].live = 2;
-		dr_fly[i].mianxiang = 0;
-		dr_fly[i].x_self = dr_fly[i].x + 30;
-		dr_fly[i].y_self = dr_fly[i].y + 30;
-		dr_fly[i].app = false;
-		dr_fly[i].shouji = 0;
-		dr_fly[i].init_y = getheight() - 45 - 125;
-		dr_fly[i].xz = 5;
-	}
-}
-void init_role()//Ğ¡ÆïÊ¿³õÊ¼»¯
-{
-	fhesc = 0;
-	mciSendString("play BGM_1 repeat", NULL, 0, NULL);     //Ñ­»·²¥·ÅÒôÀÖ
-	mciSendString("stop BGM1", NULL, 0, NULL);
-	if (music_kg == 0)
-	{
-		mciSendString("stop BGM_1", NULL, 0, NULL);
-	}
-	//µĞÈË³õÊ¼»¯
-	init_dr_fly();
-	//Ğ¡ÆïÊ¿µÄ³õÊ¼»¯
-	xqs.init_y = getheight() - 45 - 125;
-	xqs.y = xqs.init_y;
-	xqs.x = getwidth()/2-45;
-	xqs.x_self = xqs.x + 30;
-	xqs.y_self = xqs.y + 30;
-	xqs.donzuo = 0;
-	xqs.live = 1;
-	xqs.js = 0;
-	xqs.ztai1 = stand1_image2;
-	xqs.ztai2 = stand2_image2;
-	xqs.mianxiang = 1;
-	int mianxiang = 0;//0×ó£¬1ÓÒ
-	int move_pd = 0;//0Ô­µØ£¬1ÓÒ£¬-1×ó
-	int move_cd = 0;//ÅĞ¶¨ÒÆ¶¯¾àÀë
-	int jump_pd = 0;//0Ô­µØ£¬1ÏÂ£¬-1ÉÏ
-	int gj_pd = 0;//0,²»Îª0Ê±ÎŞ·¨ÒÆ¶¯ÌøÔ¾
-	int gj_pd2 = 0;//0,´óÓÚ0Ê±¿ÕÖĞÎŞ·¨Éä»÷
-	int jump_pd2 = 0;//0Îª³õÊ¼£¬·ÇÁãÎª½øĞĞÁË2¶ÎÌøÔ¾
-}
-void dr_fly_cj()
-{
-	for (int i = 0; i < dr1_num; i++)
-	{
-		if (dr_fly[i].app == false)
-		{
-			srand((unsigned)time(NULL));
-			int n_dr1 = rand() % 2;//[0,1]
-			dr_fly[i].donzuo = 0;
-			dr_fly[i].live = 2;
-			dr_fly[i].mianxiang = n_dr1;
-			dr_fly[i].shouji = 0;
-			int dr_y_1 = (rand() % (getheight() - 160 - 260 + 1)) + 260;//[a,b]
-			dr_fly[i].y = dr_y_1;//ÉèÖÃ¸ß¶È,´ÓÁ½±ß·É³ö
-			if (dr_fly[i].mianxiang == 0)
-			{
-				dr_fly[i].x = -120;
-				dr_fly[i].ztai1 = dr2_stand1;
-				dr_fly[i].ztai2 = dr2_stand2;
-			}
-			else
-			{
-				dr_fly[i].x = getwidth() + 120;
-				dr_fly[i].ztai1 = dr_stand1;
-				dr_fly[i].ztai2 = dr_stand2;
-			}
-			dr_fly[i].x_self = dr_fly[i].x + 20;
-			dr_fly[i].y_self = dr_fly[i].y + 20;
-			dr_fly[i].app = true;
-			break;
-		}
-	}
-}
-void dr_fly_donzuo()
-{
-	for (int i = 0; i < dr1_num; i++)
-	{
-		if (dr_fly[i].app == true)//ÅĞ¶Ï´æ»î
-		{
-			if (dr_fly[i].donzuo != -1)//ÅĞ¶ÏËÀÍö¶¯×÷
-			{
-				if (Timer(120, 200 + i))
-				{
-					dr_fly[i].donzuo += 1;
-					dr_fly[i].y += dr_fly[i].xz;//ĞŞÕı·ÉĞĞyÖá¶¶¶¯
-					if (dr_fly[i].xz > 0)
-					{
-						dr_fly[i].xz = -5;
-					}
-					else
-					{
-						dr_fly[i].xz = 5;
-					}
-				}
-				if (dr_fly[i].donzuo >= 4)
-				{
-					dr_fly[i].donzuo = 0;
-				}
-				//×ø±êÒÆ¶¯
-				if (dr_fly[i].mianxiang == 0)
-				{
-					dr_fly[i].x += 5;
-				}
-				else
-				{
-					dr_fly[i].x -= 5;
-				}
-				//Î»ÖÃĞŞÕı
-				if (dr_fly[i].x < -120 || dr_fly[i].x > getwidth() + 120)
-				{
-					dr_fly[i].app = false;
-				}
-			}
-			else
-			{
-				dr_fly[i].y += 35;
-				//Î»ÖÃĞŞÕı,ÂäµØËÀÍö
-				if (dr_fly[i].y_self> getheight()-dr_fly[i].high)
-				{
-					dr_fly[i].app = false;
-					dr_fly[i].donzuo = 0;
-					xqs.js += 1;//Ôö¼Ó»÷É±Êı
-					//½áËã
-					if (xqs.js >= 10)
-					{
-						mystate = win;
-					}
-				}
-			}
-		}
-	}
-}
-void dr1_fly_attack()
-{
-	for (int i = 0; i < dr1_num; i++)
-	{
-		if (dr_fly[i].app == false)
-		{
-			continue;//Èç¹ûÊÇËÀÍöµ¥Î»Ö±½ÓÌø¹ı
-		}
-		//ÅĞ¶ÏĞ¡ÆïÊ¿
-		if ((xqs.y_self >= dr_fly[i].y_self && xqs.y_self <= dr_fly[i].y_self + dr_fly[i].high)
-			|| (dr_fly[i].y_self >= xqs.y_self && dr_fly[i].y_self <= xqs.y_self + xqs.high))
-		{
-			if ((xqs.x_self >= dr_fly[i].x_self && xqs.x_self <= dr_fly[i].x_self + dr_fly[i].wight)
-				|| (dr_fly[i].x_self >= xqs.x_self && dr_fly[i].x_self <= xqs.x_self + xqs.wight))
-			{
-				if (xqs.live > 0)
-				{
-					xqs.live -= 1;
-					//ÃüÖĞÒôĞ§
-					if (music_kg == 1)
-					{
-						mciSendString("close attack_self", NULL, 0, NULL);
-						mciSendString("open ./sound/attack_self.mp3 alias attack_self", NULL, 0, NULL);
-						mciSendString("play attack_self", NULL, 0, NULL);
-					}
-					//ËÀÍöÅĞ¶¨
-					mystate = gg;
-				}
-			}
-		}
-		//ÅĞ¶Ï×Óµ¯
-		for (int j = 0; j < bull_num; j++)
-		{
-			if (bull_xqs[j].live == false)
-			{
-				continue;//Èç¹ûÊÇËÀÍöµ¥Î»Ö±½ÓÌø¹ı
-			}
-			if ((bull_xqs[j].y >= dr_fly[i].y_self && bull_xqs[j].y <= dr_fly[i].y_self + dr_fly[i].high)
-				||(dr_fly[i].y_self >= bull_xqs[j].y && dr_fly[i].y_self <= bull_xqs[j].y + bull_xqs[j].high))//ÅĞ¶Ï×Óµ¯ÊÇ·ñÔÚÆäÖĞy
-			{
-				if ((bull_xqs[j].x <= dr_fly[i].x_self + dr_fly[i].wight && bull_xqs[j].x >= dr_fly[i].x)//ÅĞ¶Ï×Óµ¯ÊÇ·ñÔÚÆäÖĞx
-					|| (dr_fly[i].x_self <= bull_xqs[j].x + bull_xqs[j].wight && dr_fly[i].x_self >= bull_xqs[j].x))
-				{
-					if (bull_xqs[j].donzuo != 2)//²»ÊÇÕıÔÚ×öËÀÍö¶¯×÷µÄ¹¥»÷
-					{
-						bull_xqs[j].donzuo = 2;
-						dr_fly[i].live -= 1;
-						bull_xqs[i].time = 10;
-						if (dr_fly[i].live != 0)
-						{
-							dr_fly[i].shouji = 2;//ÊÜ»÷ÅĞ¶¨×ö¶¯×÷
-							if (dr_fly[i].mianxiang == 0)
-							{
-								dr_fly[i].ztai1 = dr2_2stand1;
-								dr_fly[i].ztai2 = dr2_2stand2;
-							}
-							else
-							{
-								dr_fly[i].ztai1 = dr_2stand1;
-								dr_fly[i].ztai2 = dr_2stand2;
-							}
-							//ÊÜ»÷ºóÎ»ÒÆ
-							int pd_1 = bull_xqs[j].x - dr_fly[i].x_self;
-							//×Óµ¯Î»ÖÃĞŞÕı
-							bull_xqs[j].x = dr_fly[i].x;
-							if (pd_1 > 0)//´Ó×ó±ßÉäµ½ÓÒ±ß
-							{
-								dr_fly[i].x -= 50;
-							}
-							else
-							{
-								dr_fly[i].x += 50;
-							}
-						}
-						else//ËÀÍöµôÂä¶¯»­
-						{
-							dr_fly[i].donzuo = -1;
-							if (dr_fly[i].mianxiang == 0)
-							{
-								dr_fly[i].ztai1 = &dr_death1;
-								dr_fly[i].ztai2 = &dr_death2;
-							}
-							else
-							{
-								dr_fly[i].ztai1 = &dr2_death1;
-								dr_fly[i].ztai2 = &dr2_death2;
-							}
-						}
-						//ÃüÖĞÒôĞ§
-						if (music_kg == 1)
-						{
-							mciSendString("close attack_em", NULL, 0, NULL);
-							mciSendString("open ./sound/attack_em.mp3 alias attack_em", NULL, 0, NULL);
-							mciSendString("play attack_em", NULL, 0, NULL);
-						}
-					}
-				}
-			}
-		}
-	}
-}
-void draw_image()//Í¼Æ¬»æÖÆ
-{
-	//ÇåÆÁ£¨Í¼ĞÎ´°¿Ú£©    system("cls")£»Çå³ı¿ØÖÆÌ¨
-	cleardevice();
-	//·Ö¸îÏß
-	if (mystate==start)
-	{
-		putimage(0, 0, &BJ1);
-		for (int i = 0; i < getwidth();)
-		{
-			putimage(i, getheight() - 250, diban + 1, NOTSRCERASE);
-			putimage(i, getheight() - 250, diban + 0, SRCERASE);
-			i += 250;
-		}
-	}
-	/*if (mystate == home)
-	{
-		putimage(0, 0, &menu_image_bj);
-		putimage(540, 280, start_image + 1, NOTSRCERASE);
-		putimage(540, 280, start_image + 0, SRCERASE);
-		putimage(540, 380, help_image + 1, NOTSRCERASE);
-		putimage(540, 380, help_image + 0, SRCERASE);
-		putimage(540, 480, out_image + 1, NOTSRCERASE);
-		putimage(540, 480, out_image + 0, SRCERASE);
-	}*/
-	if (mystate == home)
-	{
-		putimage(0, 0, &caid);
-		putimage(ZZSB.x, ZZSB.y[ZZSB.n], gb_menu + 1, NOTSRCERASE);
-		putimage(ZZSB.x, ZZSB.y[ZZSB.n], gb_menu + 0, SRCERASE);
-	}
-	if (mystate == opxx)
-	{
-		putimage(0, 0, &caid2);
-		putimage(520, 320, YX_image + 1, NOTSRCERASE);
-		putimage(520, 320, YX_image + 0, SRCERASE);
-		putimage(510, 460, back_menu + 1, NOTSRCERASE);
-		putimage(510, 460, back_menu + 0, SRCERASE);
-		if (music_kg == 1)
-		{
-			putimage(620, 320, YXK_image + 1, NOTSRCERASE);
-			putimage(620, 320, YXK_image + 0, SRCERASE);
-		}
-		else
-		{
-			putimage(620, 320, YXG_image + 1, NOTSRCERASE);
-			putimage(620, 320, YXG_image + 0, SRCERASE);
-		}
-	}
-	if (mystate == ts1)
-	{
-		putimage(0, 0, &ts1_image);
-		putimage(510, 600, yes2_image + 1, NOTSRCERASE);
-		putimage(510, 600, yes2_image + 0, SRCERASE);
-	}
-	if (mystate == gg)
-	{
-		putimage(0, 0, &gg_image);
-	}
-	if (mystate == win)
-	{
-		putimage(0, 0, &win_image);
-	}
-	if (mystate == start)
-	{
-		putimage(0, 0, &zzbj1);
-		//Ğ¡ÆïÊ¿×ø±êĞŞÕı
-		if (xqs.x < 0)
-		{
-			xqs.x = 0;
-		}
-		if (xqs.x > getwidth() - 90)
-		{
-			xqs.x = getwidth() - 90;
-		}
-		if (xqs.y > xqs.init_y)
-		{
-			xqs.y = xqs.init_y;
-			xqs.jump_pd = 0;
-			xqs.gj_pd2 = 0;
-			xqs.jump_pd2 = 0;
-			if (xqs.mianxiang == 0)
-			{
-				xqs.ztai1 = stand1_image;
-				xqs.ztai2 = stand2_image;
-				xqs.move_pd = 0;
-			}
-			else
-			{
-				xqs.ztai1 = stand1_image2;
-				xqs.ztai2 = stand2_image2;
-				xqs.move_pd = 0;
-			}
-		}
-		//Ğ¡ÆïÊ¿ÌøÔ¾£¬ÒÆ¶¯
-		if (xqs.gj_pd != 0)
-		{
-			xqs.gj_pd -= 2;
-			if (Timer(120, 56))
-			{
-				xqs.donzuo += 1;
-				if (xqs.donzuo == 1)
-				{
-					//·¢ÉäÒôĞ§
-					if (music_kg == 1)
-					{
-						mciSendString("close attack", NULL, 0, NULL);
-						mciSendString("open ./sound/attack.mp3 alias attack", NULL, 0, NULL);
-						mciSendString("play attack", NULL, 0, NULL);
-					}
-				}
-				if (xqs.donzuo == 2)
-				{
-					createbull();
-				}
-				if (xqs.donzuo >= 4)
-				{
-					xqs.donzuo = 0;
-					xqs.gj_pd = 0;
-					if (xqs.mianxiang == 0)
-					{
-						if (xqs.jump_pd != 0)
-						{
-							xqs.ztai1 = jump1_image;
-							xqs.ztai2 = jump2_image;
-							xqs.jump_pd = 1;
-							xqs.donzuo = 2;
-						}
-						else
-						{
-							xqs.ztai1 = stand1_image;
-							xqs.ztai2 = stand2_image;
-						}
-						xqs.move_pd = 0;
-					}
-					else
-					{
-						if (xqs.jump_pd != 0)
-						{
-							xqs.ztai1 = jump1_image2;
-							xqs.ztai2 = jump2_image2;
-							xqs.jump_pd = 1;
-							xqs.donzuo = 2;
-						}
-						else
-						{
-							xqs.ztai1 = stand1_image2;
-							xqs.ztai2 = stand2_image2;
-						}
-						xqs.move_pd = 0;
-					}
-				}
-			}
-		}
-		else
-		{
-			if (xqs.jump_pd == 0)
-			{
-				if (Timer(120, 56))
-				{
-					if (xqs.y == xqs.init_y)
-					{
-						xqs.donzuo += 1;
-					}
-					if (xqs.donzuo >= 4 && xqs.move_pd == 0)
-					{
-						xqs.donzuo = 0;
-					}
-				}
-			}
-			if (xqs.jump_pd != 0)
-			{
-				if (xqs.donzuo != 2)
-				{
-					xqs.y += 26 * xqs.jump_pd;
-				}
-				else
-				{
-					xqs.y += 20 * xqs.jump_pd;
-				}
-				if (xqs.donzuo == 0)
-				{
-					if (Timer(30, 11))
-					{
-						xqs.donzuo = 1;
-					}
-				}
-				if (xqs.y < getheight() - 125 - 45 - 150-xqs.jump_pd2)
-				{
-					xqs.donzuo = 2;
-					xqs.jump_pd = 1;
-				}
-				xqs.x += 21 * xqs.move_pd;
-			}
-			else if (xqs.move_cd > 0)
-			{
-				if (xqs.donzuo >= 7)
-				{
-					xqs.donzuo = 0;
-				}
-				xqs.x += 20 * xqs.move_pd;
-				xqs.move_cd -= 15;
-			}
-			else if (xqs.move_cd <= 0 && xqs.jump_pd == 0 && xqs.move_pd != 0)
-			{
-				xqs.donzuo = 0;
-				if (xqs.mianxiang == 0)
-				{
-					xqs.ztai1 = stand1_image;
-					xqs.ztai2 = stand2_image;
-					xqs.move_pd = 0;
-				}
-				else
-				{
-					xqs.ztai1 = stand1_image2;
-					xqs.ztai2 = stand2_image2;
-					xqs.move_pd = 0;
-				}
-				xqs.move_pd = 0;
-				xqs.move_cd = 0;
-			}
-		}
-		//Ğ¡ÆïÊ¿µÄ±¾Éí×ø±êĞŞÕı
-		xqs.x_self = xqs.x + 30;
-		xqs.y_self = xqs.y + 30;
-		//Ğ¡ÆïÊ¿»æÖÆ
-		if (xqs.live > 0)
-		{
-			putimage(xqs.x, xqs.y, xqs.ztai1 + xqs.donzuo, NOTSRCERASE);
-			putimage(xqs.x, xqs.y, xqs.ztai2 + xqs.donzuo, SRCERASE);
-		}
-		//Ë¢ĞÂµĞÈË
-		if (Timer(3000, 233))
-		{
-			dr_fly_cj();
-		}
-		//µĞÈË»æÖÆ
-		for (int i = 0; i < dr1_num; i++)
-		{
-			if (dr_fly[i].app == false)
-			{
-				continue;
-			}
-			if (dr_fly[i].shouji == 0)
-			{
-				if (dr_fly[i].donzuo != -1)
-				{
-					if (dr_fly[i].mianxiang == 0)
-					{
-						dr_fly[i].ztai1 = dr2_stand1;
-						dr_fly[i].ztai2 = dr2_stand2;
-					}
-					else
-					{
-						dr_fly[i].ztai1 = dr_stand1;
-						dr_fly[i].ztai2 = dr_stand2;
-					}
-					putimage(dr_fly[i].x, dr_fly[i].y, dr_fly[i].ztai1 + dr_fly[i].donzuo, NOTSRCERASE);
-					putimage(dr_fly[i].x, dr_fly[i].y, dr_fly[i].ztai2 + dr_fly[i].donzuo, SRCERASE);
-				}
-				else
-				{
-					putimage(dr_fly[i].x, dr_fly[i].y, dr_fly[i].ztai1+0, NOTSRCERASE);
-					putimage(dr_fly[i].x, dr_fly[i].y, dr_fly[i].ztai2+0, SRCERASE);
-				}
-			}
-			else
-			{
-				putimage(dr_fly[i].x, dr_fly[i].y, dr_fly[i].ztai1 + dr_fly[i].donzuo, NOTSRCERASE);
-				putimage(dr_fly[i].x, dr_fly[i].y, dr_fly[i].ztai2 + dr_fly[i].donzuo, SRCERASE);
-				if (Timer(200, 100 + i)&& dr_fly[i].shouji != 0)//¸´Î»ÊÜ»÷¶¯×÷
-				{
-					dr_fly[i].shouji -= 1;
-				}
-			}
-			dr_fly[i].x_self = dr_fly[i].x + 20;
-			dr_fly[i].y_self = dr_fly[i].y + 20;
-		}
-		dr_fly_donzuo();
-		dr1_fly_attack();
-		//×Óµ¯»æÖÆ
-		for (int i = 0; i < bull_num; i++)
-		{
-			if (bull_xqs[i].live)
-			{
-				int nx = bull_xqs[i].donzuo;
-				if (bull_xqs[i].mianxiang == 0)
-				{
-					putimage(bull_xqs[i].x, bull_xqs[i].y, bull + nx, NOTSRCERASE);
-					putimage(bull_xqs[i].x, bull_xqs[i].y, bull2 + nx, SRCINVERT);
-				}
-				else
-				{
-					putimage(bull_xqs[i].x, bull_xqs[i].y, bull3 + nx, NOTSRCERASE);
-					putimage(bull_xqs[i].x, bull_xqs[i].y, bull4 + nx, SRCINVERT);
-				}
-				if (bull_xqs[i].time > 0&&nx==2)
-				{
-					if (Timer(100, 40+i))
-					{
-						bull_xqs[i].time = 0;
-					}
-				}
-				else if ((bull_xqs[i].time == 0 && nx == 2))
-				{
-					bull_xqs[i].live = false;
-					bull_xqs[i].donzuo = 0;
-				}
-			}
-		}
-		//·µ»Ø»æÖÆ
-		if (fhesc == 1)
-		{
-			putimage(510, 460, &zzbj2);
-			putimage(510, 460, back_menu + 1, NOTSRCERASE);
-			putimage(510, 460, back_menu + 0, SRCERASE);
-			putimage(690, 460, yes_menu + 1, NOTSRCERASE);
-			putimage(690, 460, yes_menu + 0, SRCERASE);
-			putimage(735, 460, no_menu + 1, NOTSRCERASE);
-			putimage(735, 460, no_menu + 0, SRCERASE);
-		}
-		//»ı·ÖÆ÷
-		settextcolor(RGB(255, 255, 255));
-		settextstyle(50, 25, "¿¬Ìå");
-		char fs_1[10];
-		sprintf(fs_1, "µÃ·Ö:%d", xqs.js);
-		outtextxy(0, 0, fs_1);
-	}
-}
-//Êó±êÊÇ·ñÔÚÄ³¸ö¾ØĞÎÇøÓò
-bool isInRect(ExMessage* msg, int x, int y, int w, int h)
-{
-	if (msg->x > x && msg->x <x + w && msg->y >y && msg->y < y + h)
-	{
-		return true;
-	}
-	return false;
-}
-void StartUpScence(ExMessage* msg)//ÓÃ&È¡µØÖ·Ò²¿ÉÒÔ
-{
-	//Êó±ê×ó¼üµã»÷ÇĞ»»³¡¾°»­Ãæ
-	if (msg->message == WM_LBUTTONDOWN)//WM_LBUTTONDOWN×ó¼üŞôÏÂ
-	{
-		if (mystate == home)//ÅĞ¶ÏÊÇ·ñÔÚÖ÷²Ëµ¥
-		{
-			if (isInRect(msg, 600, 420, 100, 40))//¿ªÊ¼ÓÎÏ·
-			{
-				mystate = ts1;
-				init_role();
-			}
-			else if (isInRect(msg, 600, 460, 100, 40))//Ñ¡Ïî
-			{
-				mystate = opxx;
-			}
-			else if (isInRect(msg, 600, 500, 100, 40))//³É¾Í
-			{
-				//mystate = out;
-			}
-			else if (isInRect(msg, 600, 540, 100, 40))//¶îÍâÄÚÈİ
-			{
-				//mystate = out;
-			}
-			else if (isInRect(msg, 600, 580, 100, 40))//ÍË³öÓÎÏ·
-			{
-				mystate = out;
-			}
-		}
-		else if (mystate == opxx)
-		{
-			if (isInRect(msg, 520, 320, 150, 40))//¿ª¹ØÒôĞ§
-			{
-				if (music_kg == 1)
-				{
-					music_kg = 0;
-					mciSendString("stop BGM1", NULL, 0, NULL);
-				}
-				else
-				{
-					music_kg = 1;
-					mciSendString("play BGM1 repeat", NULL, 0, NULL);
-				}
-			}
-			if (isInRect(msg, 510, 460, 150, 40))//»Øµ½²Ëµ¥
-			{
-				mystate = home;
-			}
-		}
-	}
-	//ÌáÊ¾£¬gg£¬win
-	if (msg->message == WM_LBUTTONDOWN)
-	{
-		if (mystate == ts1)
-		{
-			if (isInRect(msg, 510, 600, 225, 95))//¿ªÊ¼ÓÎÏ·
-			{
-				mystate = start;
-				init_role();
-			}
-		}
-		if (mystate == gg || mystate == win)
-		{
-			mystate = home;
-			mciSendString("play BGM1 repeat", NULL, 0, NULL);     //Ñ­»·²¥·ÅÒôÀÖ
-			mciSendString("stop BGM_1", NULL, 0, NULL);
-			if (music_kg == 0)
-			{
-				mciSendString("stop BGM1", NULL, 0, NULL);
-			}
-		}
-	}
-	//Ğ¡ÆïÊ¿»Øµ½²Ëµ¥
-	if (msg->message == WM_LBUTTONDOWN && fhesc == 1)
-	{
-		if (isInRect(msg, 690, 460, 50, 40))//·µ»Ø²Ëµ¥
-		{
-			fhesc = 0;
-			mystate = home;
-			mciSendString("play BGM1 repeat", NULL, 0, NULL);     //Ñ­»·²¥·ÅÒôÀÖ
-			mciSendString("stop BGM_1", NULL, 0, NULL);
-			if (music_kg == 0)
-			{
-				mciSendString("stop BGM1", NULL, 0, NULL);
-			}
-		}
-		else if (isInRect(msg, 735, 460, 50, 40))//È¡Ïû
-		{
-			fhesc = 0;
-		}
-	}
-}
-void gb_sb(ExMessage* msg)
-{
-	if (isInRect(msg, 600, 420, 100, 40))
-	{
-		ZZSB.n = 0;
-	}
-	else if (isInRect(msg, 600, 460, 100, 40))
-	{
-		ZZSB.n = 1;
-	}
-	else if (isInRect(msg, 600, 500, 100, 40))
-	{
-		ZZSB.n = 2;
-	}
-	else if (isInRect(msg, 600, 540, 100, 40))
-	{
-		ZZSB.n = 3;
-	}
-	else if (isInRect(msg, 600, 580, 100, 40))
-	{
-		ZZSB.n = 4;
-	}
-}
-void gb_key()
-{
-	//GetAsyncKeyState»ñÈ¡Òì²½°´¼ü×´Ì¬,²»»á×èÈû----VKÊÇĞéÄâ¼üÖµvirtual key
-	static DWORD t1 = 0, t2 = 0;//ÈÃËû²»»áÒ»´ÎĞÔŞô¶à´Î
-	if ((GetAsyncKeyState(VK_UP) || GetAsyncKeyState('W')) && t2 - t1 > 120)//ÉÏÒÆ
-	{
-		if (ZZSB.n > 0)
-		{
-			ZZSB.n -= 1;
-		}
-		t1 = t2;
-	}
-	if ((GetAsyncKeyState(VK_DOWN) || GetAsyncKeyState('S')) && t2 - t1 > 120)//ÏÂÒÆ
-	{
-		if (ZZSB.n < 4)
-		{
-			ZZSB.n += 1;
-		}
-		t1 = t2;
-	}
-	//»Ø³µ½øÈë
-	if ((GetAsyncKeyState(VK_RETURN) && ZZSB.n == 0) && t2 - t1 > 120)
-	{
-		mystate = ts1;
-		init_role();
-		t1 = t2;
-	}
-	if ((GetAsyncKeyState(VK_RETURN) && ZZSB.n == 1) && t2 - t1 > 120)
-	{
-		mystate = opxx;
-		t1 = t2;
-	}
-	if ((GetAsyncKeyState(VK_RETURN) && ZZSB.n == 2) && t2 - t1 > 120)
-	{
-		//mystate = opxx;
-		t1 = t2;
-	}
-	if ((GetAsyncKeyState(VK_RETURN) && ZZSB.n == 3) && t2 - t1 > 120)
-	{
-		//mystate = opxx;
-		t1 = t2;
-	}
-	if ((GetAsyncKeyState(VK_RETURN) && ZZSB.n == 4) && t2 - t1 > 120)
-	{
-		mystate = out;
-		t1 = t2;
-	}
-	t2 = GetTickCount();
-}
-void key_xx()
-{
-	//GetAsyncKeyState»ñÈ¡Òì²½°´¼ü×´Ì¬,²»»á×èÈû----VKÊÇĞéÄâ¼üÖµvirtual key
-	static DWORD t1 = 0, t2 = 0;//ÈÃËû²»»áÒ»´ÎĞÔŞô¶à´Î
-	if ((GetAsyncKeyState(VK_LEFT) || GetAsyncKeyState('D')|| GetAsyncKeyState(VK_RIGHT) || GetAsyncKeyState('A')) && t2 - t1 > 200)//ÇĞ»»
-	{
-		if (music_kg == 1)
-		{
-			music_kg = 0;
-			mciSendString("stop BGM1", NULL, 0, NULL);
-		}
-		else
-		{
-			music_kg = 1;
-			mciSendString("play BGM1 repeat", NULL, 0, NULL);
-		}
-		t1 = t2;
-	}
-	t2 = GetTickCount();
-	if (GetAsyncKeyState(VK_ESCAPE))
-	{
-		mystate = home;
-	}
-}
-void xqs_key()
-{
-	static DWORD t1 = 0, t2 = 0;//ÈÃËû²»»áÒ»´ÎĞÔŞô¶à´Î
-	static DWORD t3 = 0, t4 = 0;
-	//ESC
-	if (GetAsyncKeyState(VK_ESCAPE) && t2 - t1 > 300)
-	{
-		t1 = t2;
-		if (fhesc == 0)
-		{
-			fhesc = 1;//µÈÓÚ1µ¯³ö·µ»ØÑ¡µ¥
-		}
-		else
-		{
-			fhesc = 0;
-		}
-	}
-	//ÒÆ¶¯ÌøÔ¾
-	if (xqs.gj_pd == 0&&xqs.live>0)
-	{
-		//×óÒÆ¶¯
-		if ((GetAsyncKeyState(VK_LEFT) || GetAsyncKeyState('A')) && t2 - t1 > 30)
-		{
+#pragma comment(lib,"winmm.lib")
+#include<Windows.h>
 
-			if (xqs.y == xqs.init_y)//zÅĞ¶ÏÊÇ·ñÌøÔ¾
-			{
-				xqs.ztai1 = move1_image;
-				xqs.ztai2 = move2_image;
-				xqs.mianxiang = 0;
-			}
-			else if (xqs.ztai1 != move1_image)//ÅĞ¶ÏÊÇ·ñÖØÖÃ
-			{
-				xqs.donzuo = 0;
-			}
-			xqs.move_pd = -1;
-			xqs.move_cd = 20;
-			t1 = t2;
-		}
-		//JUMPÌø
-		if ((GetAsyncKeyState(VK_UP) || GetAsyncKeyState('K')) && t4 - t3 > 100)
-		{
-			if (xqs.mianxiang == 0)//×óÉÏÌø
-			{
-				if (xqs.ztai1 != jump1_image)
-				{
-					xqs.donzuo = 0;
-				}
-				xqs.ztai1 = jump1_image;
-				xqs.ztai2 = jump2_image;
-				t3 = t4;
-				if (xqs.jump_pd == 0)
-				{
-					xqs.jump_pd = -1;
-				}
-			}
-			else//ÓÒÉÏÌø
-			{
-				if (xqs.ztai1 != jump1_image2)
-				{
-					xqs.donzuo = 0;
-				}
-				xqs.ztai1 = jump1_image2;
-				xqs.ztai2 = jump2_image2;
-				t3 = t4;
-				if (xqs.jump_pd == 0)
-				{
-					xqs.jump_pd = -1;
-				}
-			}
-			if (xqs.jump_pd == 1&&xqs.jump_pd2==1)
-			{
-				xqs.jump_pd2 = 100;
-				xqs.jump_pd = -1;
-				xqs.donzuo = 0;
-			}
-			else if (xqs.jump_pd2 == 0)
-			{
-				xqs.jump_pd2 = 1;
-			}
-		}
-		//ÓÒÒÆ¶¯
-		if ((GetAsyncKeyState(VK_RIGHT) || GetAsyncKeyState('D')) && t2 - t1 > 30)
-		{
+#define ROW 10//è¡Œ 
+#define COL 10//åˆ— 
+#define NUM 10//é›· 
+#define SIZE 90
 
-			if (xqs.y == xqs.init_y)//zÅĞ¶ÏÊÇ·ñÌøÔ¾
-			{
-				xqs.ztai1 = move1_image2;
-				xqs.ztai2 = move2_image2;
-				xqs.mianxiang = 1;
-			}
-			else if (xqs.ztai1 != move1_image2)//ÅĞ¶ÏÊÇ·ñÖØÖÃ
-			{
-				xqs.donzuo = 0;
-			}
-			xqs.move_pd = 1;
-			xqs.move_cd = 20;
-			t1 = t2;
-		}
-	}
-	//·¢Éä×Óµ¯
-	if (GetAsyncKeyState('J') && xqs.gj_pd==0&&xqs.gj_pd2==0 && xqs.live > 0)
+int count = 0;
+int map[ROW + 2][COL + 2];
+IMAGE img[12];//imgå­˜æ”¾12å¼ å›¾
+
+
+void GameInit()//åˆå§‹åŒ– 
+{
+	srand((unsigned int)time(NULL));
+	for (int i = 0; i < ROW + 2; i++)
 	{
-		xqs.gj_pd = 50;
-		xqs.donzuo = 0;
-		if (xqs.y != xqs.init_y)
+		for (int j = 0; j < COL + 2; j++)
 		{
-			xqs.gj_pd2 = 1;
-		}
-		if (xqs.mianxiang == 0)
-		{
-			xqs.ztai1 = attack1_image;
-			xqs.ztai2 = attack2_image;
-		}
-		else
-		{
-			xqs.ztai1 = attack1_image2;
-			xqs.ztai2 = attack2_image2;
+			map[i][j] = { 0 };
 		}
 	}
-	t2 = GetTickCount();
-	t4 = GetTickCount();
-}
-//¶ÁÈ¡ÒôÀÖ
-void music_dq()
-{
-	mciSendString("open ./sound/1.mp3 alias BGM1", NULL, 0, NULL);
-	mciSendString("open ./sound/BGM1.mp3 alias BGM_1", NULL, 0, NULL);
-	mciSendString("open ./sound/attack.mp3 alias attack", NULL, 0, NULL);
-	mciSendString("open ./sound/attack_em.mp3 alias attack_em", NULL, 0, NULL);
-	mciSendString("open ./sound/attack_self.mp3 alias attack_self", NULL, 0, NULL);
-}
-//¶¨Ê±Æ÷
-bool Timer(clock_t ms, int id)
-{
-	static clock_t start[10] = { 0 };
-	clock_t end = clock();
-	if (end - start[id] >= ms)
+	for (int n = 0; n < NUM; n++)//å¸ƒç½®é›· 
 	{
-		start[id] = end;
-		return true;
+		int r = rand() % ROW + 1;//éšæœºè¡Œ 
+		int c = rand() % COL + 1;//éšæœºåˆ— 
+
+		if (map[r][c] == 0)
+		{
+			map[r][c] = -1;
+		}
 	}
-	return false;
 }
-int main()
+
+void GameNum()//æ‰«å‡ºçš„æ•°å­—
 {
-	music_dq();
-	//openÖ¸Áî´ò¿ªĞèÒª²¥·ÅµÄÒôÀÖ£¬aliasºóÃæÖÆ¶¨ÁËÇ°ÃæÎÄ¼şÂ·¾¶µÄ±ğÃû£¬ÒÔºóÏëÒª²Ù×÷Õâ¸öÎÄ¼şÖ±½ÓÊ¹ÓÃÕâ¸ö±ğÃû¾Í¿ÉÒÔÁË.
-	//Èç¹ûÒôÀÖÎÄ¼şºÍÎÒÃÇµÄdebugÎÄ¼ş¼ĞÔÚÍ¬Ò»Ä¿Â¼ÏÂ£¬¾Í¿ÉÒÔÏñÎÒÕâÑù²»ÓÃĞ´Â·¾¶£¬Ö±½ÓÒôÀÖÃû¡£
-	//Èç¹ûÒôÀÖÎÄ¼ş²»ÊÇÉÏÃæµÄÇé¿ö¾ÍµÃĞ´Çå³şÂ·¾¶¡£
-	//Àı: DÅÌÏÂµÄdemoÄ¿Â¼ÓĞÒ»¸ö½Ğ1.MP3µÄÎÄ¼ş
-	//mciSendString("open D:\\demo\\1.mp3 alias bkmusic", NULL, 0, NULL);
-	//mciSendString("stop bkmusic", NULL, 0, NULL);		//Í£Ö¹²¥·ÅÒôÀÖ
-	//mciSendString("close bkmusic", NULL, 0, NULL);		//¹Ø±ÕÒôÀÖ
-	//mciSendString("play BGM1 repeat", NULL, 0, NULL);     //Ñ­»·²¥·ÅÒôÀÖ
-	//´´½¨´°¿Ú
-	initgraph(1280, 720);
-	//³õÊ¼»¯
-	init_all();
-	init_image();
-	//Êä³öÍ¼Ïñ
-	//draw_image();
-	//Ë«»º³å»æÍ¼
-	mciSendString("play BGM1 repeat", NULL, 0, NULL);     //Ñ­»·²¥·ÅÒôÀÖ
-	BeginBatchDraw();
+	for (int i = 1; i < ROW + 1; i++)
+	{
+		for (int j = 1; j < COL + 1; j++)
+		{
+			if (map[i][j] != -1)
+			{
+				for (int m = i - 1; m <= i + 1; m++)
+				{
+					for (int n = j - 1; n <= j + 1; n++)
+					{
+						if (map[m][n] == -1)
+						{
+							map[i][j]++;
+						}
+					}
+				}
+			}
+		}
+	}
+	for (int i = 1; i < ROW + 1; i++)
+	{
+		for (int j = 1; j < COL + 1; j++)
+		{
+			map[i][j] += 20;
+		}
+	}
+}
+
+void GameDraw()//æ‰“å° 
+{
+	for (int i = 1; i <= ROW; i++)
+	{
+		for (int j = 1; j <= COL; j++)
+		{
+			printf("%2d", map[i][j]);
+			if (map[i][j] == -1)
+			{
+				putimage((i - 1) * SIZE, (j - 1) * SIZE, &img[9]);//é›·
+			}
+
+			else if (map[i][j] >= 0 && map[i][j] <= 8)
+			{
+				putimage((i - 1) * SIZE, (j - 1) * SIZE, &img[map[i][j]]);
+			}
+			else if (map[i][j] >= 19 && map[i][j] <= 28)
+			{//ç©ºç™½
+				putimage((i - 1) * SIZE, (j - 1) * SIZE, &img[10]);
+			}
+			else if (map[i][j] > 30)
+			{//æ ‡è®°
+				putimage((i - 1) * SIZE, (j - 1) * SIZE, &img[11]);
+			}
+		}
+		printf("\n");
+	}
+}
+void OpenZero(int r,int c)
+{
+			for (int p = r - 1; p <= r + 1; p++)
+			{
+				for (int q = c - 1; q <= c + 1; q++)
+				{
+					if (map[p][q] == 20)
+					{
+						map[p][q] -= 20;
+						count++;
+						OpenZero(p, q);
+					}
+					else if (map[p][q] > 20 && map[p][q] <= 28)
+					{
+						map[p][q] -= 20;
+						count++;
+					}
+				}
+			}
+}
+
+int PlayGame()
+{
+	//å®šä¹‰é¼ æ ‡æ¶ˆæ¯
+	MOUSEMSG msg = { 0 };
+	int r, c;
+	
 	while (1)
 	{
-		ExMessage msg;
-		//²»¶Ï»ñÈ¡Êó±êÏûÏ¢£¬Èç¹ûÓĞÏûÏ¢¾Í·µ»Øtrue£¬·ñÔò·µ»Øfalse
-		while (peekmessage(&msg, EM_MOUSE))
+		msg = GetMouseMsg();
+		switch (msg.uMsg)
 		{
-			StartUpScence(&msg);
-		}
-		FlushBatchDraw();//Ë¢ĞÂ
-		if (mystate == out)//¼ì²âµ½ÍË³ö£¬Ìø³öÑ­»·
-		{
-			break;
-		}
-		if (mystate == home)//¹â±êËæÊó±êÒÆ¶¯ÒÔ¼°¼üÅÌ¿ØÖÆ
-		{
-			gb_sb(&msg);
-			gb_key();
-		}
-		if (mystate == start)//Ğ¡ÆïÊ¿
-		{
-			xqs_key();
-			if (Timer(30,33))
+		case WM_LBUTTONDOWN://ç¿»å¼€æ‰«é›·
+			mciSendString(L"close dj", NULL, 0, NULL);
+			mciSendString(L"open dianji.mp3 alias dj", 0, 0, 0);
+			mciSendString(L"play dj", 0, 0, 0);
+			r = msg.x / SIZE + 1;
+			c = msg.y / SIZE + 1;
+			if (map[r][c] >= 19 && map[r][c] <= 28)
 			{
-				bullmove();
+				if (map[r][c] == 20)
+				{
+					mciSendString(L"close jz", NULL, 0, NULL);
+					mciSendString(L"open jizhong.mp3 alias jz", 0, 0, 0);
+					mciSendString(L"play jz", 0, 0, 0);
+					OpenZero(r ,c);
+				}
+				else if (map[r][c] != -1) {
+					map[r][c] -= 20;
+					count++;
+				}
+				return map[r][c];
+				break;
+		case WM_RBUTTONDOWN://æ ‡è®°ç©ºç™½ å–æ¶ˆæ ‡è®°
+			mciSendString(L"close jz", NULL, 0, NULL);
+			mciSendString(L"open jizhong.mp3 alias jz", 0, 0, 0);
+			mciSendString(L"play jz", 0, 0, 0);
+			r = msg.x / SIZE + 1;
+			c = msg.y / SIZE + 1;
+			if (map[r][c] >= 19 && map[r][c] <= 28) 
+			{
+				map[r][c] += 50;
+			}
+			else if (map[r][c] >= 69)
+			{
+				map[r][c] -= 50;
+				return map[r][c];
+				break;
+			}
+			GameDraw();
 			}
 		}
-		if (mystate == opxx)
+	}
+}
+
+
+int main()
+{
+	
+	mciSendString(L"open BGM.mp3 alias music", 0, 0, 0);
+	mciSendString(L"open du.mp3 alias du", 0, 0, 0);
+	
+	mciSendString(L"open jizhong.mp3 alias jz", 0, 0, 0);
+	mciSendString(L"play music", 0, 0, 0);
+
+	HWND chuangkou=initgraph(ROW * SIZE, COL * SIZE);//å®šä¹‰å¹¶æ‰“å¼€çª—å£
+
+	loadimage(&img[0], L"0.png", SIZE,SIZE);//ç©º
+	loadimage(&img[1], L"1.png", SIZE, SIZE);//é›·
+	loadimage(&img[2], L"2.png", SIZE, SIZE);
+	loadimage(&img[3], L"3.png", SIZE, SIZE);
+	loadimage(&img[4], L"4.png", SIZE, SIZE);
+	loadimage(&img[5], L"5.png", SIZE, SIZE);
+	loadimage(&img[6], L"6.png", SIZE, SIZE);
+	loadimage(&img[7], L"7.png", SIZE, SIZE);
+	loadimage(&img[8], L"8.png", SIZE, SIZE);//æ•°å­—
+	loadimage(&img[9], L"9.png", SIZE, SIZE);//é›·
+	loadimage(&img[10], L"10.png", SIZE, SIZE);//èƒŒæ™¯
+	loadimage(&img[11], L"11.png", SIZE, SIZE);//æ ‡è®°
+
+	GameInit();
+	GameNum();
+	
+	while (1)
+	{
+		
+		GameDraw();
+		if (PlayGame() == -1)
 		{
-			key_xx();
+			mciSendString(L"play du", 0, 0, 0);
+			GameDraw();
+			MessageBox(chuangkou, L"æ’æŸ¥å¤±è´¥!", L"",MB_OK);
+			break;
 		}
-		if (Timer(50, 1))
-		{
-			draw_image();
+		if (count >= ROW * COL - NUM) {
+			GameDraw();
+			MessageBox(chuangkou, L"ä½ æˆåŠŸæ’æŸ¥å‡ºäº†æ‰€æœ‰æœ‰æ¯’ç¤¼ç‰©ï¼Œè·å¾—äº†åä¸‰å¨˜çš„ç§°èµï¼", L"", MB_OK);
+			break;
 		}
 	}
-	EndBatchDraw();
 	return 0;
 }
